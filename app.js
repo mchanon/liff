@@ -47,13 +47,13 @@ function displayCartItems() {
         priceCell.textContent = "฿" + item.price.toFixed(0);
 
         // Quantity input and buttons
-        const decreaseButton = document.createElement("button");
-        decreaseButton.textContent = "-";
-        decreaseButton.onclick = () => updateQuantity(index, -1);
+        // const decreaseButton = document.createElement("button");
+        // decreaseButton.textContent = "-";
+        // decreaseButton.onclick = () => updateQuantity(index, -1);
 
-        const increaseButton = document.createElement("button");
-        increaseButton.textContent = "+";
-        increaseButton.onclick = () => updateQuantity(index, 1);
+        // const increaseButton = document.createElement("button");
+        // increaseButton.textContent = "+";
+        // increaseButton.onclick = () => updateQuantity(index, 1);
 
         const quantityInput = document.createElement("input");
         quantityInput.type = "number";
@@ -64,9 +64,9 @@ function displayCartItems() {
             updateQuantity(index, newQuantity - item.quantity);
         };
 
-        quantityCell.appendChild(decreaseButton);
+        // quantityCell.appendChild(decreaseButton);
         quantityCell.appendChild(quantityInput);
-        quantityCell.appendChild(increaseButton);
+        // quantityCell.appendChild(increaseButton);
 
         // Calculate subtotal and update the total
         const subtotal = item.price * item.quantity;
