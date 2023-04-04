@@ -2,23 +2,20 @@ const desiredUserId = "xxx";
 const currentUserId = "xxx"; // Replace this with the actual user ID from your system
 
 const cart = [
-    { product: "แป้งพร้อมกล่อง 4\"", price: 15, quantity: 0 },
-    { product: "แป้งพร้อมกล่อง 5\"", price: 17, quantity: 0 },
-    { product: "แป้งพร้อมกล่อง 7\"", price: 20, quantity: 0 },
-    { product: "แป้งพร้อมกล่อง 9\"", price: 30, quantity: 0 },
-    { product: "แป้งพร้อมกล่อง 12\"", price: 45, quantity: 0 },
-    { product: "แป้งเปล่า 4\"", price: 12, quantity: 0 },
-    { product: "แป้งเปล่า 5\"", price: 14, quantity: 0 },
-    { product: "แป้งเปล่า 7\"", price: 17, quantity: 0 },
-    { product: "แป้งเปล่า 9\"", price: 25, quantity: 0 },
-    { product: "แป้งเปล่า 12\"", price: 35, quantity: 0 },
-    { product: "ซอสพิซซ่า", price: 110, quantity: 0 },
-    { product: "ซอสมายอง", price: 85, quantity: 0 },
-    { product: "ซอสเทาซัน", price: 140, quantity: 0 },
-    { product: "ซอสสไปซี่", price: 140, quantity: 0 },
-    { product: "ชีส 2.3kg", price: 700, quantity: 0 },
-    { product: "ชีส 2.5kg", price: 750, quantity: 0 },
+    { product: "Product A", price: 10.00, quantity: 1, type: "Type 1" },
+    { product: "Product B", price: 20.00, quantity: 1, type: "Type 1" },
+    { product: "Product C", price: 30.00, quantity: 1, type: "Type 2" },
+    { product: "Product D", price: 40.00, quantity: 1, type: "Type 2" }
 ];
+
+function groupBy(arr, property) {
+    return arr.reduce((memo, item) => {
+        const key = item[property];
+        memo[key] = memo[key] || [];
+        memo[key].push(item);
+        return memo;
+    }, {});
+}
 
 function showCheckoutForm() {
     if (currentUserId === desiredUserId) {
@@ -28,63 +25,84 @@ function showCheckoutForm() {
 }
 
 function displayCartItems() {
-    const cartItems = document.getElementById("cartItems");
+    const productAccordion = document.getElementById("productAccordion");
     const totalPrice = document.getElementById("totalPrice");
+    const groupedProducts = groupBy(cart, "type");
 
-    // Clear existing rows before appending new ones
-    cartItems.innerHTML = '';
+    // Clear existing accordion items before appending new ones
+    productAccordion.innerHTML = '';
 
     let total = 0;
+    let accordionIndex = 0;
 
-    cart.forEach((item, index) => {
-        const row = document.createElement("tr");
-        const productCell = document.createElement("td");
-        const priceCell = document.createElement("td");
-        const quantityCell = document.createElement("td");
-        const subtotalCell = document.createElement("td");
+    for (const type in groupedProducts) {
+        const products = groupedProducts[type];
+        const accordionItemId = `accordion${accordionIndex}`;
+        const collapseItemId = `collapse${accordionIndex}`;
 
-        productCell.textContent = item.product;
-        priceCell.textContent = "฿" + item.price.toFixed(0);
+        const accordionItem = document.createElement("div");
+        accordionItem.classList.add("accordion-item");
 
-        // Quantity input and buttons
-        // const decreaseButton = document.createElement("button");
-        // decreaseButton.textContent = "-";
-        // decreaseButton.onclick = () => updateQuantity(index, -1);
+        const accordionHeader = document.createElement("h2");
+        accordionHeader.classList.add("accordion-header");
+        accordionHeader.id = accordionItemId;
 
-        // const increaseButton = document.createElement("button");
-        // increaseButton.textContent = "+";
-        // increaseButton.onclick = () => updateQuantity(index, 1);
+        const accordionButton = document.createElement("button");
+        accordionButton.classList.add("accordion-button", "collapsed");
+        accordionButton.setAttribute("type", "button");
+        accordionButton.setAttribute("data-bs-toggle", "collapse");
+        accordionButton.setAttribute("data-bs-target", `#${collapseItemId}`);
+        accordionButton.setAttribute("aria-expanded", "false");
+        accordionButton.setAttribute("aria-controls", collapseItemId);
+        accordionButton.textContent = type;
 
-        const quantityInput = document.createElement("input");
-        quantityInput.type = "number";
-        quantityInput.value = item.quantity;
-        quantityInput.min = "1";
-        quantityInput.onchange = (event) => {
-            const newQuantity = parseInt(event.target.value);
-            updateQuantity(index, newQuantity - item.quantity);
-        };
+        accordionHeader.appendChild(accordionButton);
 
-        // quantityCell.appendChild(decreaseButton);
-        quantityCell.appendChild(quantityInput);
-        // quantityCell.appendChild(increaseButton);
+        const accordionCollapse = document.createElement("div");
+        accordionCollapse.classList.add("accordion-collapse", "collapse");
+        accordionCollapse.id = collapseItemId;
+        accordionCollapse.setAttribute("aria-labelledby", accordionItemId);
+        accordionCollapse.setAttribute("data-bs-parent", "#productAccordion");
 
-        // Calculate subtotal and update the total
-        const subtotal = item.price * item.quantity;
-        subtotalCell.textContent = "฿" + subtotal.toFixed(0);
-        total += subtotal;
+        const accordionBody = document.createElement("div");
+        accordionBody.classList.add("accordion-body");
 
-        row.appendChild(productCell);
-        row.appendChild(priceCell);
-        row.appendChild(quantityCell);
-        row.appendChild(subtotalCell);
-        cartItems.appendChild(row);
-    });
+        const productList = document.createElement("ul");
 
-    totalPrice.textContent = total.toFixed(0);
+        products.forEach((item, index) => {
+            const listItem = document.createElement("li");
+
+            listItem.textContent = `${item.product} - Price: $${item.price.toFixed(2)} - Quantity: ${item.quantity}`;
+
+            const decreaseButton = document.createElement("button");
+            decreaseButton.textContent = "-";
+            decreaseButton.onclick = () => updateQuantity(item, -1);
+
+            const increaseButton = document.createElement("button");
+            increaseButton.textContent = "+";
+            increaseButton.onclick = () => updateQuantity(item, 1);
+
+            listItem.appendChild(decreaseButton);
+            listItem.appendChild(increaseButton);
+
+            productList.appendChild(listItem);
+
+            total += item.price * item.quantity;
+        });
+
+        accordionBody.appendChild(productList);
+        accordionCollapse.appendChild(accordionBody);
+        accordionItem.appendChild(accordionHeader);
+        accordionItem.appendChild(accordionCollapse);
+        productAccordion.appendChild(accordionItem);
+
+        accordionIndex++;
+    }
+
+    totalPrice.textContent = total.toFixed(2);
 }
 
-function updateQuantity(index, delta) {
-    const item = cart[index];
+function updateQuantity(item, delta) {
     const newQuantity = item.quantity + delta;
 
     if (newQuantity >= 1) {
